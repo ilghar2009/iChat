@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
@@ -12,52 +13,49 @@ class UserController extends Controller
      */
     public function index()
     {
-        //
+        $users = User::all();
+        return view('user.index', compact('users'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
+    public function sign(){
+        return view('user.auth');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
+    public function authenticate(Request $request){
+        validator($request->all())->validate();
+
+        if($request->role === 'sign') {
+            $valid = User::where('name', $request->name)
+                ->orWhere('user_name', $request->user_name)->first();
+
+            if($valid)
+                return view('user.auth', ['alertS' => 'name or username already exists']);
+            else {
+                $user = User::create($request->all());
+                Auth::login($user);
+            }
+        }else{
+            $userName = $request->user_name;
+            $userPass = $request->password;
+
+            $user = User::where('user_name', $userName)->where('password', $userPass)->first();
+            if($user){
+                Auth::login($user);
+            }else
+                return view('user.auth', ['alertL' => 'username or password is wrong']);
+        }
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(User $user)
     {
         //
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(User $user)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, User $user)
     {
         //
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(User $user)
     {
         //

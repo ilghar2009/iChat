@@ -144,23 +144,39 @@
     <div class="forms">
       <!-- 🟩 فرم ورود -->
       <div class="form-box login">
-        <h2>ورود</h2>
-        <input type="text" id="li_username" placeholder="نام کاربری">
-        <input type="password" id="li_password" placeholder="رمز عبور">
-        <button onclick="login()">ورود</button>
-        <div class="switch" onclick="toggleForm()">ثبت‌نام ندارید؟ کلیک کنید</div>
-        <div id="li_error" class="error"></div>
+        <form action="{{('auth')}}" method="post">
+          @csrf
+          <h2>ورود</h2>
+          <input type="text" name="user_name" id="li_username" placeholder="نام کاربری">
+          <input type="password" name="password" id="li_password" placeholder="رمز عبور">
+          <input type="hidden" name="role" value="sign">
+          <button onclick="login()">ورود</button>
+          <div class="switch" onclick="toggleForm()">ثبت‌نام ندارید؟ کلیک کنید</div>
+          <div id="li_error" class="error">
+            @isset($alertS)
+              {{$alertS}}
+            @endisset
+          </div>
+        </form>
       </div>
 
       <!-- 🟦 فرم ثبت‌نام -->
       <div class="form-box signup">
-        <h2>ثبت‌نام</h2>
-        <input type="text" id="su_name" placeholder="نام کامل">
-        <input type="text" id="su_username" placeholder="نام کاربری">
-        <input type="password" id="su_password" placeholder="رمز عبور (حداقل ۸ کاراکتر)">
-        <button onclick="signup()">ثبت‌نام کنید</button>
-        <div class="switch" onclick="toggleForm()">قبلاً ثبت‌نام کرده‌اید؟ ورود</div>
-        <div id="su_error" class="error"></div>
+        <form action="{{('auth')}}" method="post">
+          @csrf
+          <h2>ثبت‌نام</h2>
+          <input type="text" id="su_name" name="name" placeholder="نام کامل">
+          <input type="text" id="su_username" name="user_name" placeholder="نام کاربری">
+          <input type="password" id="su_password" name="password" placeholder="رمز عبور (حداقل ۸ کاراکتر)">
+          <input type="hidden" name="role" value="login">
+          <button onclick="signup()">ثبت‌نام کنید</button>
+          <div class="switch" onclick="toggleForm()">قبلاً ثبت‌نام کرده‌اید؟ ورود</div>
+          <div id="su_error" class="error">
+            @isset($alertL)
+              {{$alertL}}
+            @endisset
+          </div>
+        <form>
       </div>
     </div>
   </div>
