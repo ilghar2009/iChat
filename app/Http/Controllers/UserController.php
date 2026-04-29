@@ -46,18 +46,32 @@ class UserController extends Controller
         }
     }
 
-    public function show(User $user)
-    {
-        //
+    public function access_change(User $user){
+        $role = 0;
+
+        if($user->user_id != Auth::user()->user_id && $user->user_name && 'Admin') {
+            $user->is_access = !$user->is_access;
+            $user->save();
+            $role = 1;
+        }
+
+        return redirect()->route('user.index', ['success' => $role]);
     }
 
-    public function update(Request $request, User $user)
-    {
-        //
+    public function role_change(User $user){
+        $role = 0;
+
+        if($user->user_id != Auth::user()->user_id && $user->user_name && 'Admin') {
+            $user->is_admin = !$user->is_admin;
+            $user->save();
+        }
+
+        return redirect()->route('user.index', ['success' => $role]);
     }
 
     public function destroy(User $user)
     {
-        //
+        $user->delete();
+        return redirect()->back();
     }
 }
