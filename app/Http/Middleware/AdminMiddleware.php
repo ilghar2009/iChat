@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
 use Symfony\Component\HttpFoundation\Response;
 
-class AuthMiddleware
+class AdminMiddleware
 {
     /**
      * Handle an incoming request.

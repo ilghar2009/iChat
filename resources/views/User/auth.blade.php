@@ -149,12 +149,12 @@
           <h2>ورود</h2>
           <input type="text" name="user_name" id="li_username" placeholder="نام کاربری">
           <input type="password" name="password" id="li_password" placeholder="رمز عبور">
-          <input type="hidden" name="role" value="sign">
+          <input type="hidden" name="role" value="login">
           <button onclick="login()">ورود</button>
           <div class="switch" onclick="toggleForm()">ثبت‌نام ندارید؟ کلیک کنید</div>
           <div id="li_error" class="error">
-            @isset($alertS)
-              {{$alertS}}
+            @isset($alertL)
+              {{$alertL}}
             @endisset
           </div>
         </form>
@@ -168,12 +168,12 @@
           <input type="text" id="su_name" name="name" placeholder="نام کامل">
           <input type="text" id="su_username" name="user_name" placeholder="نام کاربری">
           <input type="password" id="su_password" name="password" placeholder="رمز عبور (حداقل ۸ کاراکتر)">
-          <input type="hidden" name="role" value="login">
+          <input type="hidden" name="role" value="sign">
           <button onclick="signup()">ثبت‌نام کنید</button>
           <div class="switch" onclick="toggleForm()">قبلاً ثبت‌نام کرده‌اید؟ ورود</div>
           <div id="su_error" class="error">
-            @isset($alertL)
-              {{$alertL}}
+            @isset($alertS)
+              {{$alertS}}
             @endisset
           </div>
         <form>
