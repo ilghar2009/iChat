@@ -84,7 +84,7 @@
     <table>
       <thead>
         <tr>
-          <th>شناسه</th>
+          <th>نام کاربری</th>
           <th>نام</th>
           <th>نقش</th>
           <th>دسترسی</th>
@@ -92,16 +92,17 @@
         </tr>
       </thead>
       <tbody id="userTable">
+            @php $i = 0; @endphp
         @foreach($users as $user)
-          <tr data-user-id="{{ $user->id }}">
-            <td>{{ $user->id }}</td>
+          <tr data-user-id="{{ $user->user_id }}">
+            <td>{{ $user->user_name }}</td>
             <td>{{ $user->name }}</td>
-            <td>{{ $user->role }}</td>
-            <td>{{ $user->access ? 'مجاز' : 'غیرمجاز' }}</td>
+            <td>{{ $user->is_admin }}</td>
+            <td>{{ $user->is_active ? 'مجاز' : 'غیرمجاز' }}</td>
             <td>
               <button class="btn btn-role">تغییر نقش</button>
-              <button class="btn btn-access {{ $user->access ? '' : 'blocked' }}">
-                {{ $user->access ? 'غیرفعال کردن' : 'فعال کردن' }}
+              <button class="btn btn-access {{ $user->is_active ? '' : 'blocked' }}">
+                {{ $user->is_active ? 'غیرفعال کردن' : 'فعال کردن' }}
               </button>
               <button class="btn btn-delete">حذف</button>
             </td>
