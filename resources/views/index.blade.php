@@ -249,7 +249,7 @@
         </style>
     </head>
 
-    <body data-user-id="{{ auth()->id() ?? 0 }}">
+    <body data-user-id="{{ auth()->user()->user_id ?? 0 }}">
 
         <div class="sidebar" id="sidebar">
             <h2>Menu</h2>
@@ -260,12 +260,15 @@
             </a>
 
             <a class="side" href="#">
-                <div class="menu-item">Profile</div>
+                <div class="menu-item">@if(auth()->user()) Profile @else Sign @endif</div>
             </a>
 
-            <a class="side" href="#">
-                <div class="menu-item">Clear Message</div>
-            </a>
+            @if(auth()->user()->is_admin)
+                <a class="side" href="#">
+                    <div class="menu-item">Clear Message</div>
+                </a>
+            @endif
+
         </div>
 
         <div class="main">
@@ -277,27 +280,25 @@
 
             <div class="chat-area" id="chatArea">
                 <!-- پیام ها اینجا نمایش داده میشن -->
-                <div class="message-container other-message-container">
-                    <img src="https://via.placeholder.com/40/007bff/ffffff?text=U1" alt="Profile Pic" class="profile-pic">
-                    <div class="message other-message">
-                        <div class="message-sender">User1</div>
-                        سلام! چطوری؟
+
+                @foreach($messages  as $message)
+                    <div class="message-container other-message-container">
+                        <img alt="Profile Pic" class="profile-pic">
+                        <div class="message @php if($message->user->user_id == auth()->user()->user_id) echo 'other-message'; else echo 'my-message';  @endphp">
+                            <div class="message-sender">{{$message->user->name}}</div>
+                            {{$message->body}}
+                        </div>
                     </div>
-                </div>
-                <div class="message-container my-message-container">
-                    <img src="https://via.placeholder.com/40/2a2a2a/ffffff?text=You" alt="Profile Pic" class="profile-pic">
-                    <div class="message my-message">
-                        <div class="message-sender">You</div>
-                        سلام! خوبم، ممنون. تو چطوری؟
-                    </div>
-                </div>
-                <div class="message-container other-message-container">
-                    <img src="https://via.placeholder.com/40/007bff/ffffff?text=U2" alt="Profile Pic" class="profile-pic">
-                    <div class="message other-message">
-                        <div class="message-sender">User2</div>
-                        منم خوبم. آماده ای برای شروع؟
-                    </div>
-                </div>
+                @endforeach
+
+{{--                <div class="message-container my-message-container">--}}
+{{--                    <img src="https://via.placeholder.com/40/2a2a2a/ffffff?text=You" alt="Profile Pic" class="profile-pic">--}}
+{{--                    <div class="message my-message">--}}
+{{--                        <div class="message-sender">You</div>--}}
+{{--                        سلام! خوبم، ممنون. تو چطوری؟--}}
+{{--                    </div>--}}
+{{--                </div>--}}
+
             </div>
 
             <div class="input-area">
@@ -312,7 +313,7 @@
         <script>
             // ===== متغیرهای اصلی =====
             // دریافت ID کاربر از لاراول
-            const currentUserId = {{ auth()->id() ?? 0 }};
+            const currentUserId = {{ auth()->user()->user_id ?? 0 }};
 
             const chatArea = document.getElementById("chatArea");
             const messageInput = document.getElementById("messageInput");
