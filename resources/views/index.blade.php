@@ -3,6 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="csrf-token" content="{{ csrf_token() }}">
         <title>iChat</title>
 
         <style>
@@ -248,7 +249,7 @@
         </style>
     </head>
 
-    <body>
+    <body data-user-id="{{ auth()->id() ?? 0 }}">
 
         <div class="sidebar" id="sidebar">
             <h2>Menu</h2>
@@ -306,35 +307,36 @@
                     <button onclick="sendMessage()">ارسال</button>
                 </form>
             </div>
-
         </div>
 
         <script>
+            // ===== متغیرهای اصلی =====
+            // دریافت ID کاربر از لاراول
+            const currentUserId = {{ auth()->id() ?? 0 }};
+
+            const chatArea = document.getElementById("chatArea");
+            const messageInput = document.getElementById("messageInput");
+            let lastMessageId = 0; // آخرین پیام دریافتی
+
+            // ===== منو =====
             function toggleMenu() {
                 document.getElementById("sidebar").classList.toggle("active");
             }
 
-            const chatArea = document.getElementById("chatArea");
-            const messageInput = document.getElementById("messageInput");
-
-            function sendMessage() {
-                const messageText = messageInput.value.trim();
-                if (messageText === "") return;
-
-                const senderName = "You"; // نام کاربری خودمون
-                addMessage(senderName, messageText, "my-message"); // اضافه کردن پیام خودمون
-
-                messageInput.value = ""; // پاک کردن اینپوت
-                chatArea.scrollTop = chatArea.scrollHeight; // اسکرول به پایین
-            }
-
-            // تابع اضافه کردن پیام (هم برای خودمون هم برای دیگران)
-            function addMessage(senderName, messageContent, messageClass) {
-                // ایجاد کانتینر پیام و پروفایل
+            // ===== تابع اضافه کردن پیام به صفحه =====
+            function addMessage(senderId, senderName, messageContent, messageClass) {
                 const messageContainer = document.createElement("div");
                 messageContainer.className = `message-container ${messageClass}-container`;
 
-                // ایجاد خود پیام
+                // ساخت عکس پروفایل (از سرویس ui-avatars برای تولید عکس بر اساس نام)
+                const profilePic = document.createElement("img");
+                // اگر نام خالی بود، "U" نشان بده
+                const nameForAvatar = senderName || "User";
+                profilePic.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(nameForAvatar)}&background=random&color=fff`;
+                profilePic.alt = "Profile Pic";
+                profilePic.className = "profile-pic";
+
+                // ساخت پیام
                 const messageDiv = document.createElement("div");
                 messageDiv.className = `message ${messageClass}`;
 
@@ -345,40 +347,103 @@
                 messageDiv.appendChild(senderInfo);
                 messageDiv.appendChild(document.createTextNode(messageContent));
 
-                // اضافه کردن عکس و پیام به کانتینر
+                // اضافه کردن به کانتینر
                 messageContainer.appendChild(profilePic);
                 messageContainer.appendChild(messageDiv);
 
-                // اضافه کردن کانتینر پیام به چت اریا
+                // اضافه کردن به صفحه
                 chatArea.appendChild(messageContainer);
+
+                // اسکرول به پایین
                 chatArea.scrollTop = chatArea.scrollHeight;
             }
 
-            // ارسال پیام با کلید Enter
+            // ===== ارسال پیام به سرور (AJAX) =====
+            async function sendMessage() {
+                const messageText = messageInput.value.trim();
+                if (messageText === "") return;
+
+                // نمایش فوری پیام خودمان (Optimistic UI)
+                // چون پیام خودمان است، استایل my-message می‌گیرد
+                addMessage(currentUserId, "شما", messageText, "my-message");
+
+                messageInput.value = ""; // پاک کردن اینپوت
+
+                try {
+                    const response = await fetch('/chat/send', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: JSON.stringify({ body: messageText })
+                    });
+
+                    const data = await response.json();
+
+                    // اگر سرور موفق بود، lastMessageId را آپدیت کن
+                    if (data.message && data.message.id) {
+                        lastMessageId = data.message.id;
+                    }
+                } catch (error) {
+                    console.error('خطا در ارسال پیام:', error);
+                    alert('خطا در ارسال پیام!');
+                }
+            }
+
+            // ===== اتصال SSE (گوش دادن به پیام‌های جدید) =====
+            function initSSE() {
+                // اتصال به روت stream و فرستادن آخرین ID
+                const source = new EventSource(`/chat/stream?last_id=${lastMessageId}`);
+
+                source.onmessage = function(event) {
+                    try {
+                        const data = JSON.parse(event.data);
+
+                        // اگر ID پیام جدیدتر از آخرین پیامی بود که داشتیم
+                        if (data.id > lastMessageId) {
+                            lastMessageId = data.id;
+
+                            // اگر پیام متعلق به خودمان نبود، نمایش بده
+                            // (چون پیام خودمان را قبلاً با AJAX اضافه کردیم)
+                            if (data.user_id != currentUserId) {
+                                addMessage(data.user_id, data.user_name, data.body, "other-message");
+                            }
+                        }
+                    } catch (e) {
+                        console.error('خطا در پردازش داده SSE:', e);
+                    }
+                };
+
+                source.onerror = function(event) {
+                    console.error('خطا در اتصال SSE');
+                    source.close();
+                    // تلاش مجدد بعد از ۳ ثانیه
+                    setTimeout(initSSE, 3000);
+                };
+            }
+
+            // ===== رویدادها =====
+
+            // کلیک روی دکمه ارسال
+            document.querySelector('.input-area button').addEventListener('click', function(e) {
+                e.preventDefault(); // جلوگیری از رفرش فرم
+                sendMessage();
+            });
+
+            // ارسال با کلید Enter
             messageInput.addEventListener("keypress", function(event) {
                 if (event.key === "Enter") {
-                    event.preventDefault();
+                    event.preventDefault(); // جلوگیری از رفرش فرم
                     sendMessage();
                 }
             });
 
-            // اسکرول به پایین در بارگذاری اولیه صفحه
+            // اسکرول به پایین در بارگذاری اولیه
             chatArea.scrollTop = chatArea.scrollHeight;
 
-            const input = document.getElementById('targetInput');
-
-            // روی همه‌ی message-container ها گوش می‌ذاریم
-            // document.querySelectorAll('.message-container').forEach(container => {
-            //     container.addEventListener('dblclick', function () {
-            //         const messageId = this.id; // id همون message-container
-            //         if (messageId) {
-            //         input.value = messageId;
-            //         } else {
-            //         console.warn('این پیام id نداره');
-            //         }
-            //     });
-            // });
-
+            // ===== شروع SSE =====
+            initSSE();
         </script>
 
     </body>
