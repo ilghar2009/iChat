@@ -15,6 +15,15 @@ class MessageController extends Controller
 
     public function store(Request $request)
     {
+        $request->validate([
+            'body' => 'required|string|max:1000',
+        ]);
 
+        $message = Message::create([
+            'user_id' => auth()->user->user_id,
+            'body' => $request->body,
+        ]);
+
+        return redirect()->view('index')->with('message', $message);
     }
 }
