@@ -39,6 +39,8 @@ class SseController extends Controller
                     $lastId = $message->id;
                 }
             }
+
+            sleep(1);
         }
     }
 }
