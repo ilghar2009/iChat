@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('messages', function (Blueprint $table) {
-            $table->string('id')->unique();
+            $table->id();
             $table->longText('body');
             $table->string('user_id');
             $table->timestamps();
