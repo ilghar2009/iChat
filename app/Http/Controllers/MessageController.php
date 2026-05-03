@@ -19,7 +19,7 @@ class MessageController extends Controller
             'body' => 'required|string|max:1000',
         ]);
 
-        $message = Message::create([
+        Message::Create([
             'user_id' => auth()->user->user_id,
             'body' => $request->body,
         ]);

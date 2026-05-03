@@ -23,16 +23,19 @@ class UserController extends Controller
     }
 
     public function authenticate(Request $request){
+        validator($request->all())->validate();
+
         if($request->role === 'sign') {
             $valid = User::where('name', $request->name)
                 ->orWhere('user_name', $request->user_name)->first();
 
-            if(!$valid)
+            if($valid)
                 return view('user.auth', ['alertS' => 'name or username already exists']);
             else {
                 $user = User::create($request->all());
                 Auth::login($user);
                 session()->regenerate();
+
             }
         }else{
             $userName = $request->user_name;

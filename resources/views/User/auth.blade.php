@@ -208,7 +208,7 @@
         return;
       }
       su_error.innerText = "";
-      // alert("ثبت‌نام با موفقیت انجام شد!");
+      alert("ثبت‌نام با موفقیت انجام شد!");
       toggleForm();
     }
 
