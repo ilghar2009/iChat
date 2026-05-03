@@ -144,7 +144,7 @@
     <div class="forms">
       <!-- 🟩 فرم ورود -->
       <div class="form-box login">
-        <form action="{{('auth')}}" method="post">
+        <form action="{{route('auth')}}" method="post">
           @csrf
           <h2>ورود</h2>
           <input type="text" name="user_name" id="li_username" placeholder="نام کاربری">
@@ -153,16 +153,16 @@
           <button onclick="login()">ورود</button>
           <div class="switch" onclick="toggleForm()">ثبت‌نام ندارید؟ کلیک کنید</div>
           <div id="li_error" class="error">
-            @isset($alertL)
-              {{$alertL}}
-            @endisset
+            @if(isset($alertL) or isset(request()['alertL']))
+              {{$alertL??request()['alertL']}}
+            @endif
           </div>
         </form>
       </div>
 
       <!-- 🟦 فرم ثبت‌نام -->
       <div class="form-box signup">
-        <form action="{{('auth')}}" method="post">
+        <form action="{{route('auth')}}" method="post">
           @csrf
           <h2>ثبت‌نام</h2>
           <input type="text" id="su_name" name="name" placeholder="نام کامل">
@@ -208,7 +208,7 @@
         return;
       }
       su_error.innerText = "";
-      alert("ثبت‌نام با موفقیت انجام شد!");
+      // alert("ثبت‌نام با موفقیت انجام شد!");
       toggleForm();
     }
 
@@ -221,7 +221,7 @@
         return;
       }
       li_error.innerText = "";
-      alert("ورود موفقیت‌آمیز!");
+      // alert("ورود موفقیت‌آمیز!");
     }
   </script>
 

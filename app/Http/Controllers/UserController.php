@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
@@ -22,25 +23,26 @@ class UserController extends Controller
     }
 
     public function authenticate(Request $request){
-        validator($request->all())->validate();
-
         if($request->role === 'sign') {
             $valid = User::where('name', $request->name)
                 ->orWhere('user_name', $request->user_name)->first();
 
-            if($valid)
+            if(!$valid)
                 return view('user.auth', ['alertS' => 'name or username already exists']);
             else {
                 $user = User::create($request->all());
                 Auth::login($user);
+                session()->regenerate();
             }
         }else{
             $userName = $request->user_name;
-            $userPass = $request->password;
 
-            $user = User::where('user_name', $userName)->where('password', $userPass)->first();
-            if($user){
+            $user = User::where('user_name', $userName)->first();
+            if($user and Hash::check($request->password, $user->password)){
                 Auth::login($user);
+                session()->regenerate();
+
+                return redirect()->route('chat.index');
             }else
                 return view('user.auth', ['alertL' => 'username or password is wrong']);
         }

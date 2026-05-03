@@ -303,7 +303,7 @@
 
             <div class="input-area">
                 <form action="#" method="get">
-                    <input type="text" id="messageInput" placeholder="پیام خود را بنویسید...">
+                    <input type="text" id="messageInput" name="body" placeholder="پیام خود را بنویسید...">
                     <!-- <input type="hidden" id="targetInput" style="display: none;"> -->
                     <button onclick="sendMessage()">ارسال</button>
                 </form>

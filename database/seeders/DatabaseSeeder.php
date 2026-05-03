@@ -18,7 +18,8 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::factory()->create([
+        User::create([
+            'user_id' => \Illuminate\Support\Str::uuid(),
             'name' => 'Admin',
             'user_name' => 'Admin',
             'password' => Hash::make('Admin123@'),

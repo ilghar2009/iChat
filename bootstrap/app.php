@@ -15,6 +15,11 @@ return Application::configure(basePath: dirname(__DIR__))
             'Auth' => \App\Http\Middleware\AuthMiddleware::class,
             'Admin' => \App\Http\Middleware\AdminMiddleware::class,
         ]);
+
+//        $middleware->group('web', [
+//            \Illuminate\Session\Middleware\StartSession::class,
+//        ]);
+
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

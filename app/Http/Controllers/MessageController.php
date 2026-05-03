@@ -10,7 +10,7 @@ class MessageController extends Controller
     public function index()
     {
         $messages = Message::all();
-        return view('index', compact($messages));
+        return view('index', compact('messages'));
     }
 
     public function store(Request $request)

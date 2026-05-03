@@ -23,6 +23,6 @@ class AdminMiddleware
             return $next($request);
         }
 
-        return Redirect::route('authP', ['signL' => 'you dont have permission access to this page']);
+        return Redirect::route('authP', ['alertL' => 'you dont have permission access to this page']);
     }
 }
