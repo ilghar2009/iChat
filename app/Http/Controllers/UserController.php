@@ -22,33 +22,35 @@ class UserController extends Controller
         return view('user.auth');
     }
 
-    public function authenticate(Request $request){
-        validator($request->all())->validate();
+    public function authenticate(Request $request)
+    {
+        $validator = validator($request->all())->validate();
+        if($validator->fails()){
+            if ($request->role === 'sign') {
+                $valid = User::where('name', $request->name)
+                    ->orWhere('user_name', $request->user_name)->first();
 
-        if($request->role === 'sign') {
-            $valid = User::where('name', $request->name)
-                ->orWhere('user_name', $request->user_name)->first();
+                if ($valid)
+                    return view('user.auth', ['alertS' => 'name or username already exists']);
+                else {
+                    $user = User::create($request->all());
+                    Auth::login($user);
+                    session()->regenerate();
 
-            if($valid)
-                return view('user.auth', ['alertS' => 'name or username already exists']);
-            else {
-                $user = User::create($request->all());
-                Auth::login($user);
-                session()->regenerate();
+                }
+            } else {
+                $userName = $request->user_name;
 
+                $user = User::where('user_name', $userName)->first();
+                if ($user and Hash::check($request->password, $user->password)) {
+                    Auth::login($user);
+                    session()->regenerate();
+
+                    return redirect()->route('chat.index');
+                }
             }
-        }else{
-            $userName = $request->user_name;
-
-            $user = User::where('user_name', $userName)->first();
-            if($user and Hash::check($request->password, $user->password)){
-                Auth::login($user);
-                session()->regenerate();
-
-                return redirect()->route('chat.index');
-            }else
-                return view('user.auth', ['alertL' => 'username or password is wrong']);
         }
+        return view('user.auth', ['alertL' => 'username or password is wrong']);
     }
 
     public function access_change(User $user){
