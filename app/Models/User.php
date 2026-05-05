@@ -12,7 +12,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 
-#[Fillable(['user_id','name', 'user_name', 'password'])]
+//#[Fillable(['user_id','name', 'user_name', 'password'])]
 //#[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -24,6 +24,12 @@ class User extends Authenticatable
      *
      * @return array<string, string>
      */
+    protected $fillable = [
+      'user_id',
+      'name',
+      'user_name',
+      'password',
+    ];
 
     public $primaryKey = 'user_id';
     public $incrementing = false;
