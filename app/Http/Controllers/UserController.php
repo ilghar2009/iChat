@@ -24,21 +24,25 @@ class UserController extends Controller
 
     public function authenticate(Request $request)
     {
-        $validator = validator($request->all())->validate();
-        if($validator->fails()){
-            if ($request->role === 'sign') {
-                $valid = User::where('name', $request->name)
-                    ->orWhere('user_name', $request->user_name)->first();
+        $validator = validator()->make($request->all(),[
+           'name' => ['sometimes', 'string', 'max:10', 'unique:users,name'],
+           'username' => ['required', 'string', 'max:10', 'unique:users,username'],
+           'password' => ['required', 'string', 'min:8'],
+        ]);
 
-                if ($valid)
-                    return view('user.auth', ['alertS' => 'name or username already exists']);
-                else {
-                    $user = User::create($request->all());
-                    Auth::login($user);
-                    session()->regenerate();
+        if($request->role === 'sign') {
+            if(!$validator->fails()) {
+                $user = User::create($request->all());
+                Auth::login($user);
+                session()->regenerate();
 
-                }
-            } else {
+                return redirect()->route('chat.index');
+            }else
+                return redirect()->route('authP')
+                    ->withErrors('messages', $validator->errors()->messages())
+                    ->withInput();
+        } else {
+            if (!$validator->fails()) {
                 $userName = $request->user_name;
 
                 $user = User::where('user_name', $userName)->first();
@@ -47,10 +51,15 @@ class UserController extends Controller
                     session()->regenerate();
 
                     return redirect()->route('chat.index');
-                }
-            }
+                } else
+                    return view('user.auth', ['alertL' => 'username or password is wrong']);
+            }else
+                return redirect()->route('authP')
+                    ->withErrors('messages', $validator->errors()->messages())
+                    ->withInput();
         }
-        return view('user.auth', ['alertL' => 'username or password is wrong']);
+
+        return redirect()->route('authP');
     }
 
     public function access_change(User $user){
